@@ -16,7 +16,7 @@ Re-written for geopandas by Sam R.
 
 GNU General Public License
 '''
-
+blockage_tolerance = 2
 
 def calcWaterCourseLength(fid_col, starting_fid, network, direction=0, tolerance=.1):
     '''
@@ -130,7 +130,7 @@ def calcWaterCourseLengthBlockage(fid_col, starting_fid, network, blockage, dire
                              + (next_coord[1] - cur_coord[1]) ** 2)
 
             if dist <= tolerance:
-                the_blockage = blockage[blockage.within(next_feat.buffer(1).unary_union)]
+                the_blockage = blockage[blockage.within(next_feat.buffer(blockage_tolerance).unary_union)]
                 if the_blockage.empty:
                     # if within tolerance adds fid to continue exploration & to the final vertex
                     found_vertex.append(fid)
@@ -164,7 +164,8 @@ if __name__ == "__main__":
     rivers = gpd.read_file(os.path.join(dir, r"test data\RiverWorfeBarriersDRN.shp"))
     weirs = gpd.read_file(os.path.join(dir, r"test data\fish_barriers.shp"))
 
-    selected, length = calcWaterCourseLength(fid_col='DRN_ID', starting_fid="eaew1001000000225417", network=rivers, direction=1)
+    selected, length = calcWaterCourseLength(fid_col='DRN_ID', starting_fid="eaew1001000000242269", network=rivers, direction=0)
     print(selected, length)
-    selected, length = calcWaterCourseLengthBlockage(fid_col='DRN_ID', starting_fid="eaew1001000000225417", network=rivers, blockage=weirs, direction=1)
+    selected, length = calcWaterCourseLengthBlockage(fid_col='DRN_ID', starting_fid="eaew1001000000242269", network=rivers, blockage=weirs, direction=0)
     print(selected, length)
+    selected.to_file(os.path.join(dir, r"\blocked.shp"))
