@@ -137,14 +137,21 @@ def calcWaterCourseLengthBlockage(fid_col, starting_fid, network, blockage, dire
                     possible_vertex.append(fid)
                 else:
                     # if within tolerance but blockage only add section up til blockage in network to found
-                    # & don't add to possible vertex to stop exploration
-
+                    # & don't add to possible vertex to stop exploration sum(network[network[fid_col].isin(found_vertex)].copy().length)
                     blockage_x, blockage_y = the_blockage.geometry.x.values[0], the_blockage.geometry.y.values[0]
                     dists = [math.sqrt((coord[0] - blockage_x) ** 2
                                        + (coord[1] - blockage_y) ** 2) for coord in coords]
-                    line_til_weir = LineString(coords[:dists.index(min(dists))])
-                    network.loc[network[fid_col] == fid, 'geometry'] = line_til_weir
+                    idx = dists.index(min(dists))
+                    if idx+1 <= len(coords)-1:
+                        idx += 1
+                    if direction == 0:
+                        not_blocked = coords[idx:]
+                    else:
+                        not_blocked = coords[:idx]
 
+                    line_til_weir = LineString(not_blocked)
+                    network.loc[network[fid_col] == fid, 'geometry'] = line_til_weir
+                    # gpd.GeoDataFrame(geometry=[line_til_weir]).to_file(r"C:\dev\000000-00 Watercourse Length\test data\temp.shp")
                     found_vertex.append(fid)
 
     selected = network[network[fid_col].isin(found_vertex)].copy()
@@ -155,14 +162,9 @@ if __name__ == "__main__":
     dir = os.path.dirname(os.path.realpath(__file__))
 
     rivers = gpd.read_file(os.path.join(dir, r"test data\RiverWorfeBarriersDRN.shp"))
-    weirs = gpd.read_file(os.path.join(dir,r"test data\RiverWorfeBarriers.shp"))
+    weirs = gpd.read_file(os.path.join(dir, r"test data\fish_barriers.shp"))
 
-    # test features:
-    # eaew1001000000258269 # test id (30 upstream & 26 downstream)
-    # eaew1001000000225135 # blockage in next feature 444 ish total len
-    # eaew1001000000222782 # blockage about 2500m away, unblocked length 14000m.
-
-    selected, length = calcWaterCourseLength(fid_col='DRN_ID', starting_fid="eaew1001000000258269", network=rivers)
+    selected, length = calcWaterCourseLength(fid_col='DRN_ID', starting_fid="eaew1001000000225417", network=rivers, direction=1)
     print(selected, length)
-    selected, length = calcWaterCourseLengthBlockage(fid_col='DRN_ID', starting_fid="eaew1001000000222782", network=rivers, blockage=weirs)
+    selected, length = calcWaterCourseLengthBlockage(fid_col='DRN_ID', starting_fid="eaew1001000000225417", network=rivers, blockage=weirs, direction=1)
     print(selected, length)

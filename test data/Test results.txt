@@ -1,0 +1,12 @@
+Upstream
+eaew1001000000226163 unblocked - 17 features, 3226m
+eaew1001000000226163 blocked - 6 features, 947m
+
+eaew1001000000226163 manually measured blocked - 946m
+
+
+Downstream
+eaew1001000000225417 unblocked - 49 feats 19436m
+eaew1001000000225417 blocked - 2 feats 266m
+
+eaew1001000000225417 manually measured blocked - 266m
